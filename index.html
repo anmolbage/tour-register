@@ -372,6 +372,122 @@
             </div>
         </div>
 
+        <!-- Manual Entry Modal -->
+        <div id="manual-entry-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Tour Entry</h3>
+                    <button class="icon-btn modal-close-btn" id="close-manual-entry">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="manual-entry-form">
+                    <div class="input-group">
+                        <label>Date</label>
+                        <input type="date" id="manual-entry-date" class="input-field">
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Time Out</label>
+                            <input type="time" id="manual-entry-time-out" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label>Time In</label>
+                            <input type="time" id="manual-entry-time-in" class="input-field">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Location / Address</label>
+                        <input type="text" id="manual-entry-address" class="input-field" placeholder="e.g. SBI Branch, MG Road">
+                        <button class="btn btn-secondary btn-sm mt-1" id="manual-entry-use-gps">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 2v4m0 12v4M4 12h4m12 0h4M12 22a10 10 0 100-20 10 10 0 000 20z" stroke-width="2"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            Use Current Location
+                        </button>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Distance (KM)</label>
+                        <input type="number" id="manual-entry-distance" class="input-field" step="0.1" min="0" placeholder="0.0">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Purpose</label>
+                    </div>
+                    <div class="purpose-grid" id="manual-purpose-grid">
+                        <button class="purpose-btn" data-purpose="govt">
+                            <span class="purpose-icon">🏛️</span>
+                            <span class="purpose-label">Govt Meeting</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="official">
+                            <span class="purpose-icon">💼</span>
+                            <span class="purpose-label">Official Meeting</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="customer">
+                            <span class="purpose-icon">👥</span>
+                            <span class="purpose-label">Customer Meeting</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="pre-sanction">
+                            <span class="purpose-icon">📋</span>
+                            <span class="purpose-label">Pre-Sanction</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="post-sanction">
+                            <span class="purpose-icon">✅</span>
+                            <span class="purpose-label">Post-Sanction</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="followup">
+                            <span class="purpose-icon">📞</span>
+                            <span class="purpose-label">Lead Follow-up</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="notice">
+                            <span class="purpose-icon">📄</span>
+                            <span class="purpose-label">Notice Serve</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="recovery">
+                            <span class="purpose-icon">💰</span>
+                            <span class="purpose-label">Recovery Visit</span>
+                        </button>
+                        <button class="purpose-btn" data-purpose="others">
+                            <span class="purpose-icon">📌</span>
+                            <span class="purpose-label">Others</span>
+                        </button>
+                    </div>
+
+                    <div class="additional-fields">
+                        <textarea id="manual-entry-notes" placeholder="Optional notes..." rows="3"></textarea>
+
+                        <div class="photo-section">
+                            <input type="file" id="manual-entry-photo" accept="image/*" capture="environment" style="display: none;">
+                            <button class="btn btn-secondary" id="manual-entry-add-photo-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                                    <circle cx="12" cy="13" r="4"/>
+                                </svg>
+                                Add Photo
+                            </button>
+                            <div id="manual-entry-photo-preview"></div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success btn-large" id="save-manual-entry">Save Entry</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAB (Floating Action Button) for Manual Entry -->
+        <button class="fab" id="fab-add-entry" style="display: none;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14m-7-7h14" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        </button>
+
         <!-- Bottom Navigation -->
         <nav class="bottom-nav" id="bottom-nav" style="display: none;">
             <button class="nav-item active" data-screen="home">

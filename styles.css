@@ -1085,6 +1085,86 @@ body {
 }
 
 /* ===================================
+   Floating Action Button (FAB)
+   =================================== */
+.fab {
+    position: fixed;
+    bottom: calc(var(--nav-height) + 20px);
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--text-inverse);
+    border: none;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.fab:active {
+    transform: scale(0.92);
+    background: var(--primary-dark);
+}
+
+/* ===================================
+   Manual Entry Modal
+   =================================== */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.modal-close-btn {
+    flex-shrink: 0;
+}
+
+.manual-entry-form .input-group {
+    margin-bottom: 16px;
+}
+
+.manual-entry-form .input-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.input-row .input-group {
+    margin-bottom: 16px;
+}
+
+.btn-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+#manual-entry-photo-preview {
+    display: none;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+}
+
+#manual-entry-photo-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ===================================
    Responsive Design
    =================================== */
 @media (min-width: 768px) {

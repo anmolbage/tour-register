@@ -168,8 +168,25 @@ class TourRegisterApp {
             () => this.exportToPDF());
         
         // Settings
-        document.getElementById('settings-btn').addEventListener('click', 
+        document.getElementById('settings-btn').addEventListener('click',
             () => this.openSettings());
+
+        // Manual Entry
+        document.getElementById('fab-add-entry').addEventListener('click',
+            () => this.openManualEntry());
+        document.getElementById('close-manual-entry').addEventListener('click',
+            () => this.closeManualEntry());
+        document.getElementById('manual-entry-use-gps').addEventListener('click',
+            () => this.manualEntryUseGPS());
+        document.getElementById('manual-entry-add-photo-btn').addEventListener('click',
+            () => document.getElementById('manual-entry-photo').click());
+        document.getElementById('manual-entry-photo').addEventListener('change',
+            (e) => this.handleManualEntryPhoto(e));
+        document.getElementById('save-manual-entry').addEventListener('click',
+            () => this.saveManualEntry());
+        document.querySelectorAll('#manual-purpose-grid .purpose-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.selectManualPurpose(e));
+        });
     }
     
     // ===================================
@@ -249,11 +266,13 @@ class TourRegisterApp {
             }
         });
         
-        // Show/hide bottom nav
+        // Show/hide bottom nav and FAB
         if (screenName === 'login' || screenName === 'setup') {
             document.getElementById('bottom-nav').style.display = 'none';
+            document.getElementById('fab-add-entry').style.display = 'none';
         } else {
             document.getElementById('bottom-nav').style.display = 'flex';
+            document.getElementById('fab-add-entry').style.display = 'flex';
         }
         
         // Load screen-specific data
@@ -689,6 +708,171 @@ class TourRegisterApp {
         this.showToast('PDF export will be implemented', 'info');
     }
     
+    // ===================================
+    // Manual Tour Entry
+    // ===================================
+    openManualEntry() {
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('manual-entry-date').value = today;
+
+        // Set default times
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('manual-entry-time-out').value = `${hours}:${minutes}`;
+        document.getElementById('manual-entry-time-in').value = '';
+
+        // Clear other fields
+        document.getElementById('manual-entry-address').value = '';
+        document.getElementById('manual-entry-distance').value = '';
+        document.getElementById('manual-entry-notes').value = '';
+        document.getElementById('manual-entry-photo').value = '';
+        document.getElementById('manual-entry-photo-preview').style.display = 'none';
+        document.getElementById('manual-entry-photo-preview').innerHTML = '';
+        document.querySelectorAll('#manual-purpose-grid .purpose-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        document.getElementById('manual-entry-modal').classList.add('active');
+    }
+
+    closeManualEntry() {
+        document.getElementById('manual-entry-modal').classList.remove('active');
+    }
+
+    selectManualPurpose(e) {
+        document.querySelectorAll('#manual-purpose-grid .purpose-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        e.currentTarget.classList.add('selected');
+    }
+
+    async manualEntryUseGPS() {
+        if (!navigator.geolocation) {
+            this.showToast('Geolocation not supported', 'error');
+            return;
+        }
+
+        this.showLoading();
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const address = await this.reverseGeocode(lat, lng);
+                document.getElementById('manual-entry-address').value = address;
+                this.hideLoading();
+                this.showToast('Location captured', 'success');
+            },
+            (error) => {
+                this.hideLoading();
+                this.showToast('Could not get location: ' + error.message, 'error');
+            },
+            { enableHighAccuracy: true }
+        );
+    }
+
+    handleManualEntryPhoto(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const preview = document.getElementById('manual-entry-photo-preview');
+                preview.innerHTML = `<img src="${event.target.result}" alt="Visit photo">`;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async saveManualEntry() {
+        const date = document.getElementById('manual-entry-date').value;
+        const timeOut = document.getElementById('manual-entry-time-out').value;
+        const timeIn = document.getElementById('manual-entry-time-in').value;
+        const address = document.getElementById('manual-entry-address').value.trim();
+        const distance = parseFloat(document.getElementById('manual-entry-distance').value) || 0;
+        const notes = document.getElementById('manual-entry-notes').value.trim();
+        const photoFile = document.getElementById('manual-entry-photo').files[0];
+
+        const selectedPurpose = document.querySelector('#manual-purpose-grid .purpose-btn.selected');
+
+        // Validation
+        if (!date) {
+            this.showToast('Please select a date', 'error');
+            return;
+        }
+        if (!timeOut) {
+            this.showToast('Please enter time out', 'error');
+            return;
+        }
+        if (!selectedPurpose) {
+            this.showToast('Please select a purpose', 'error');
+            return;
+        }
+
+        const purpose = selectedPurpose.dataset.purpose;
+
+        // Calculate timestamps
+        const timeOutDate = new Date(`${date}T${timeOut}`);
+        let duration = 0;
+        let timeInTimestamp = null;
+
+        if (timeIn) {
+            const timeInDate = new Date(`${date}T${timeIn}`);
+            timeInTimestamp = timeInDate.getTime();
+            duration = Math.round((timeInDate - timeOutDate) / 60000); // minutes
+            if (duration < 0) {
+                this.showToast('Time In must be after Time Out', 'error');
+                return;
+            }
+        }
+
+        const visit = {
+            date: date,
+            timeIn: timeOutDate.getTime(),
+            timeOut: timeInTimestamp,
+            duration: duration,
+            lat: null,
+            lng: null,
+            address: address || 'Manual entry',
+            distance: distance,
+            purpose: purpose,
+            notes: notes,
+            classified: true,
+            manual: true
+        };
+
+        // Save to database
+        const transaction = this.db.transaction(['visits', 'photos'], 'readwrite');
+        const visitStore = transaction.objectStore('visits');
+        const request = visitStore.add(visit);
+
+        request.onsuccess = async () => {
+            const visitId = request.result;
+
+            if (photoFile) {
+                const photoStore = transaction.objectStore('photos');
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    photoStore.add({
+                        visitId,
+                        data: e.target.result
+                    });
+                };
+                reader.readAsDataURL(photoFile);
+            }
+
+            this.showToast('Tour entry added successfully', 'success');
+            this.closeManualEntry();
+            this.loadTodayStats();
+            this.loadRecentVisits();
+        };
+
+        request.onerror = () => {
+            this.showToast('Failed to save entry', 'error');
+        };
+    }
+
     openSettings() {
         this.navigateTo('setup');
     }
