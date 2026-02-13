@@ -13,7 +13,8 @@ class TourRegisterApp {
         this.isTracking = false;
         this.currentPosition = null;
         this.pendingVisit = null;
-        
+        this.exclusionZones = [];
+
         this.init();
     }
     
@@ -93,6 +94,14 @@ class TourRegisterApp {
                 this.geoFenceRadius = radiusRequest.result.value;
             }
         };
+
+        // Load exclusion zones
+        const exclusionRequest = store.get('exclusionZones');
+        exclusionRequest.onsuccess = () => {
+            if (exclusionRequest.result) {
+                this.exclusionZones = exclusionRequest.result.value;
+            }
+        };
     }
     
     async saveSetting(key, value) {
@@ -170,6 +179,20 @@ class TourRegisterApp {
         // Settings
         document.getElementById('settings-btn').addEventListener('click',
             () => this.openSettings());
+
+        // Exclusion Zones
+        document.getElementById('add-exclusion-btn').addEventListener('click',
+            () => this.openExclusionModal());
+        document.getElementById('close-exclusion-modal').addEventListener('click',
+            () => this.closeExclusionModal());
+        document.getElementById('exclusion-use-gps').addEventListener('click',
+            () => this.exclusionUseGPS());
+        document.getElementById('exclusion-radius').addEventListener('input',
+            (e) => {
+                document.getElementById('exclusion-radius-value').textContent = e.target.value;
+            });
+        document.getElementById('save-exclusion').addEventListener('click',
+            () => this.saveExclusion());
 
         // Manual Entry
         document.getElementById('fab-add-entry').addEventListener('click',
@@ -287,6 +310,9 @@ class TourRegisterApp {
                 break;
             case 'dashboard':
                 this.updateDashboard('month');
+                break;
+            case 'setup':
+                this.renderExclusionList();
                 break;
             case 'export':
                 this.setDefaultExportMonth();
@@ -708,6 +734,154 @@ class TourRegisterApp {
         this.showToast('PDF export will be implemented', 'info');
     }
     
+    // ===================================
+    // Exclusion Zones
+    // ===================================
+    openExclusionModal() {
+        document.getElementById('exclusion-name').value = '';
+        document.getElementById('exclusion-lat').value = '';
+        document.getElementById('exclusion-lng').value = '';
+        document.getElementById('exclusion-radius').value = 200;
+        document.getElementById('exclusion-radius-value').textContent = '200';
+        document.getElementById('exclusion-location-preview').style.display = 'none';
+        this._exclusionCoords = null;
+        document.getElementById('exclusion-modal').classList.add('active');
+    }
+
+    closeExclusionModal() {
+        document.getElementById('exclusion-modal').classList.remove('active');
+    }
+
+    async exclusionUseGPS() {
+        if (!navigator.geolocation) {
+            this.showToast('Geolocation not supported', 'error');
+            return;
+        }
+
+        this.showLoading();
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                document.getElementById('exclusion-lat').value = lat.toFixed(6);
+                document.getElementById('exclusion-lng').value = lng.toFixed(6);
+                this._exclusionCoords = { lat, lng };
+
+                const address = await this.reverseGeocode(lat, lng);
+                const preview = document.getElementById('exclusion-location-preview');
+                preview.querySelector('.location-status').textContent = `✓ ${address.substring(0, 60)}`;
+                preview.style.display = 'block';
+
+                this.hideLoading();
+                this.showToast('Location captured', 'success');
+            },
+            (error) => {
+                this.hideLoading();
+                this.showToast('Could not get location: ' + error.message, 'error');
+            },
+            { enableHighAccuracy: true }
+        );
+    }
+
+    async saveExclusion() {
+        const name = document.getElementById('exclusion-name').value.trim();
+        const lat = parseFloat(document.getElementById('exclusion-lat').value);
+        const lng = parseFloat(document.getElementById('exclusion-lng').value);
+        const radius = parseInt(document.getElementById('exclusion-radius').value);
+
+        if (!name) {
+            this.showToast('Please enter a place name', 'error');
+            return;
+        }
+        if (isNaN(lat) || isNaN(lng)) {
+            this.showToast('Please set a location', 'error');
+            return;
+        }
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            this.showToast('Coordinates out of range', 'error');
+            return;
+        }
+
+        const zone = {
+            id: Date.now(),
+            name,
+            lat,
+            lng,
+            radius
+        };
+
+        this.exclusionZones.push(zone);
+        await this.saveSetting('exclusionZones', this.exclusionZones);
+
+        this.showToast(`"${name}" added to excluded places`, 'success');
+        this.closeExclusionModal();
+        this.renderExclusionList();
+    }
+
+    async removeExclusion(id) {
+        this.exclusionZones = this.exclusionZones.filter(z => z.id !== id);
+        await this.saveSetting('exclusionZones', this.exclusionZones);
+        this.renderExclusionList();
+        this.showToast('Place removed', 'success');
+    }
+
+    renderExclusionList() {
+        const container = document.getElementById('exclusion-list');
+        if (!this.exclusionZones || this.exclusionZones.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state-sm">
+                    <p>No excluded places yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.exclusionZones.map(zone => `
+            <div class="exclusion-item">
+                <div class="exclusion-info">
+                    <div class="exclusion-name">${zone.name}</div>
+                    <div class="exclusion-meta">${zone.radius}m radius</div>
+                </div>
+                <button class="exclusion-remove" data-id="${zone.id}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
+
+        // Attach delete handlers
+        container.querySelectorAll('.exclusion-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.dataset.id);
+                this.removeExclusion(id);
+            });
+        });
+    }
+
+    isInExclusionZone(lat, lng) {
+        if (!this.exclusionZones || this.exclusionZones.length === 0) return false;
+
+        for (const zone of this.exclusionZones) {
+            const R = 6371e3;
+            const p1 = lat * Math.PI / 180;
+            const p2 = zone.lat * Math.PI / 180;
+            const dp = (zone.lat - lat) * Math.PI / 180;
+            const dl = (zone.lng - lng) * Math.PI / 180;
+            const a = Math.sin(dp/2) * Math.sin(dp/2) +
+                      Math.cos(p1) * Math.cos(p2) *
+                      Math.sin(dl/2) * Math.sin(dl/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+
+            if (distance <= zone.radius) {
+                console.log(`Location is within exclusion zone "${zone.name}" (${distance.toFixed(0)}m away, radius: ${zone.radius}m)`);
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ===================================
     // Manual Tour Entry
     // ===================================

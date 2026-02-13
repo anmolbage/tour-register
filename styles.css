@@ -1085,6 +1085,115 @@ body {
 }
 
 /* ===================================
+   Exclusion Zones
+   =================================== */
+.setup-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.setup-card-header h3 {
+    margin-bottom: 0;
+}
+
+.setup-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.exclusion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.exclusion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-sm);
+    padding: 12px 16px;
+}
+
+.exclusion-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.exclusion-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exclusion-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.exclusion-remove {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+}
+
+.exclusion-remove:active {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.empty-state-sm {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.radius-slider-sm {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-color);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.radius-slider-sm::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+}
+
+.radius-slider-sm::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: none;
+}
+
+/* ===================================
    Floating Action Button (FAB)
    =================================== */
 .fab {
