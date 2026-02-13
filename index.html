@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a472a">
+    <meta name="description" content="Bank Branch Manager Tour Register - Track field visits, GPS locations, and generate reports">
+    
+    <title>Tour Register</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app" class="app-container">
+        
+        <!-- PIN Login Screen -->
+        <div id="login-screen" class="screen active">
+            <div class="login-container">
+                <div class="login-header">
+                    <div class="app-icon">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                            <rect width="64" height="64" rx="16" fill="url(#grad1)"/>
+                            <path d="M32 16L44 24V40L32 48L20 40V24L32 16Z" fill="white" opacity="0.9"/>
+                            <circle cx="32" cy="32" r="4" fill="#1a472a"/>
+                            <defs>
+                                <linearGradient id="grad1" x1="0" y1="0" x2="64" y2="64">
+                                    <stop offset="0%" stop-color="#2d5f3f"/>
+                                    <stop offset="100%" stop-color="#1a472a"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h1 class="login-title">Tour Register</h1>
+                    <p class="login-subtitle">Branch Manager's Field Tracker</p>
+                </div>
+                
+                <div class="pin-display">
+                    <div class="pin-dots">
+                        <span class="pin-dot"></span>
+                        <span class="pin-dot"></span>
+                        <span class="pin-dot"></span>
+                        <span class="pin-dot"></span>
+                    </div>
+                    <p class="pin-label" id="pin-label">Enter PIN</p>
+                </div>
+                
+                <div class="pin-pad">
+                    <button class="pin-key" data-key="1">1</button>
+                    <button class="pin-key" data-key="2">2</button>
+                    <button class="pin-key" data-key="3">3</button>
+                    <button class="pin-key" data-key="4">4</button>
+                    <button class="pin-key" data-key="5">5</button>
+                    <button class="pin-key" data-key="6">6</button>
+                    <button class="pin-key" data-key="7">7</button>
+                    <button class="pin-key" data-key="8">8</button>
+                    <button class="pin-key" data-key="9">9</button>
+                    <button class="pin-key empty"></button>
+                    <button class="pin-key" data-key="0">0</button>
+                    <button class="pin-key backspace" data-key="back">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M9 9l6 6m0-6l-6 6M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="first-time-setup" id="first-time-setup" style="display: none;">
+                    <p>First time? Set your 4-digit PIN</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Branch Setup Screen -->
+        <div id="setup-screen" class="screen">
+            <div class="screen-header">
+                <h2>Branch Setup</h2>
+                <p>Configure your branch location and geo-fence</p>
+            </div>
+            
+            <div class="setup-container">
+                <div class="setup-card">
+                    <h3>Branch Location</h3>
+                    <div class="location-display" id="location-display">
+                        <p class="location-status">No location set</p>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-large" id="use-current-location">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 2v4m0 12v4M4 12h4m12 0h4M12 22a10 10 0 100-20 10 10 0 000 20z" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        Use Current Location
+                    </button>
+                    
+                    <div class="divider">OR</div>
+                    
+                    <div class="input-group">
+                        <label>Latitude</label>
+                        <input type="number" id="manual-lat" step="0.000001" placeholder="23.7957">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Longitude</label>
+                        <input type="number" id="manual-lng" step="0.000001" placeholder="85.5166">
+                    </div>
+                    
+                    <button class="btn btn-secondary" id="set-manual-location">Set Location</button>
+                </div>
+                
+                <div class="setup-card">
+                    <h3>Geo-Fence Radius</h3>
+                    <div class="radius-control">
+                        <input type="range" id="radius-slider" min="500" max="5000" step="100" value="1000">
+                        <div class="radius-display">
+                            <span id="radius-value">1.0</span> km
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-success btn-large" id="save-setup">
+                    Save & Continue
+                </button>
+            </div>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen">
+            <div class="screen-header compact">
+                <h2>Tour Register</h2>
+                <div class="header-actions">
+                    <button class="icon-btn" id="settings-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v6m0 6v10M1 12h6m6 0h10" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="status-card" id="tracking-status">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span class="status-text">Inside Branch</span>
+                </div>
+                <div class="status-details">
+                    <p id="location-status-text">GPS tracking paused</p>
+                </div>
+            </div>
+            
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="today-km">0.0</div>
+                    <div class="stat-label">KM Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="today-hours">0h 0m</div>
+                    <div class="stat-label">Field Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="today-visits">0</div>
+                    <div class="stat-label">Visits</div>
+                </div>
+            </div>
+            
+            <div class="recent-section">
+                <h3>Today's Activity</h3>
+                <div id="recent-visits" class="visits-list">
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 2L2 7v10c0 5.5 3.8 9.7 10 11 6.2-1.3 10-5.5 10-11V7l-10-5z"/>
+                        </svg>
+                        <p>No visits recorded today</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visits Screen -->
+        <div id="visits-screen" class="screen">
+            <div class="screen-header">
+                <h2>Visit History</h2>
+                <button class="icon-btn" id="filter-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 6h18M8 12h8m-5 6h2" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="filter-bar" id="filter-bar" style="display: none;">
+                <select id="month-filter" class="filter-select">
+                    <option value="all">All Months</option>
+                </select>
+                <select id="purpose-filter" class="filter-select">
+                    <option value="all">All Purposes</option>
+                    <option value="govt">Govt Meeting</option>
+                    <option value="official">Official Meeting</option>
+                    <option value="customer">Customer Meeting</option>
+                    <option value="pre-sanction">Pre-Sanction</option>
+                    <option value="post-sanction">Post-Sanction</option>
+                    <option value="followup">Lead Follow-up</option>
+                    <option value="notice">Notice Serve</option>
+                    <option value="recovery">Recovery Visit</option>
+                    <option value="others">Others</option>
+                </select>
+            </div>
+            
+            <div id="all-visits" class="visits-list">
+                <!-- Visits will be populated here -->
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboard-screen" class="screen">
+            <div class="screen-header">
+                <h2>Dashboard</h2>
+                <select id="dashboard-period" class="period-select">
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="quarter">This Quarter</option>
+                </select>
+            </div>
+            
+            <div class="dashboard-stats">
+                <div class="stat-card large">
+                    <div class="stat-value" id="dash-total-km">0.0</div>
+                    <div class="stat-label">Total KM</div>
+                </div>
+                <div class="stat-card large">
+                    <div class="stat-value" id="dash-total-hours">0h</div>
+                    <div class="stat-label">Field Hours</div>
+                </div>
+                <div class="stat-card large">
+                    <div class="stat-value" id="dash-total-visits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <h3>Purpose Breakdown</h3>
+                <div class="purpose-chart" id="purpose-chart">
+                    <!-- Chart will be generated here -->
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <h3>Daily Activity</h3>
+                <div class="activity-chart" id="activity-chart">
+                    <!-- Chart will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Screen -->
+        <div id="export-screen" class="screen">
+            <div class="screen-header">
+                <h2>Export Data</h2>
+                <p>Generate reports for your tour register</p>
+            </div>
+            
+            <div class="export-container">
+                <div class="export-card">
+                    <h3>Select Period</h3>
+                    <div class="input-group">
+                        <label>Month</label>
+                        <input type="month" id="export-month" class="input-field">
+                    </div>
+                </div>
+                
+                <div class="export-card">
+                    <h3>Export Format</h3>
+                    <button class="btn btn-export excel" id="export-excel">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
+                            <path d="M14 2v6h6M9 15l6-6m0 6L9 9" stroke="white" fill="none" stroke-width="2"/>
+                        </svg>
+                        Export to Excel
+                    </button>
+                    
+                    <button class="btn btn-export pdf" id="export-pdf">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
+                            <text x="8" y="16" font-size="8" fill="white" font-weight="bold">PDF</text>
+                        </svg>
+                        Export to PDF
+                    </button>
+                </div>
+                
+                <div class="export-preview" id="export-preview">
+                    <!-- Preview will show here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Visit Classification Modal -->
+        <div id="classify-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Classify Visit</h3>
+                    <p class="visit-time" id="visit-time-display"></p>
+                </div>
+                
+                <div class="purpose-grid">
+                    <button class="purpose-btn" data-purpose="govt">
+                        <span class="purpose-icon">🏛️</span>
+                        <span class="purpose-label">Govt Meeting</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="official">
+                        <span class="purpose-icon">💼</span>
+                        <span class="purpose-label">Official Meeting</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="customer">
+                        <span class="purpose-icon">👥</span>
+                        <span class="purpose-label">Customer Meeting</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="pre-sanction">
+                        <span class="purpose-icon">📋</span>
+                        <span class="purpose-label">Pre-Sanction</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="post-sanction">
+                        <span class="purpose-icon">✅</span>
+                        <span class="purpose-label">Post-Sanction</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="followup">
+                        <span class="purpose-icon">📞</span>
+                        <span class="purpose-label">Lead Follow-up</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="notice">
+                        <span class="purpose-icon">📄</span>
+                        <span class="purpose-label">Notice Serve</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="recovery">
+                        <span class="purpose-icon">💰</span>
+                        <span class="purpose-label">Recovery Visit</span>
+                    </button>
+                    <button class="purpose-btn" data-purpose="others">
+                        <span class="purpose-icon">📌</span>
+                        <span class="purpose-label">Others</span>
+                    </button>
+                </div>
+                
+                <div class="additional-fields">
+                    <textarea id="visit-notes" placeholder="Optional notes..." rows="3"></textarea>
+                    
+                    <div class="photo-section">
+                        <input type="file" id="visit-photo" accept="image/*" capture="environment" style="display: none;">
+                        <button class="btn btn-secondary" id="add-photo-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                                <circle cx="12" cy="13" r="4"/>
+                            </svg>
+                            Add Photo
+                        </button>
+                        <div id="photo-preview"></div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-success btn-large" id="save-visit">Save Visit</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav" id="bottom-nav" style="display: none;">
+            <button class="nav-item active" data-screen="home">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                </svg>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-screen="visits">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2L2 7v10c0 5.5 3.8 9.7 10 11 6.2-1.3 10-5.5 10-11V7l-10-5z"/>
+                </svg>
+                <span>Visits</span>
+            </button>
+            <button class="nav-item" data-screen="dashboard">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-item" data-screen="export">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m14-7l-5-5m0 0L7 8m5-5v12"/>
+                </svg>
+                <span>Export</span>
+            </button>
+        </nav>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script src="tracking.js"></script>
+    <script src="export.js"></script>
+    
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+    </script>
+</body>
+</html>

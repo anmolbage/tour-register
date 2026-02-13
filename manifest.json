@@ -1,0 +1,67 @@
+{
+  "name": "Tour Register - Branch Manager Field Tracker",
+  "short_name": "Tour Register",
+  "description": "GPS-based field visit tracker for bank branch managers with offline support and automated visit logging",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a472a",
+  "theme_color": "#1a472a",
+  "orientation": "portrait",
+  "scope": "./",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshot-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Visits",
+      "short_name": "Today",
+      "description": "View today's field visits",
+      "url": "./index.html?view=today",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Export Report",
+      "short_name": "Export",
+      "description": "Export tour register report",
+      "url": "./index.html?screen=export",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    "geolocation",
+    "notifications"
+  ],
+  "prefer_related_applications": false
+}
