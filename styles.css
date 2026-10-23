@@ -1224,7 +1224,8 @@ body {
 /* ===================================
    Manual Entry Modal
    =================================== */
-.modal-header {
+#manual-entry-modal .modal-header,
+#exclusion-modal .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;

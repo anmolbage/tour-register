@@ -148,7 +148,7 @@ class TourRegisterApp {
             () => this.saveSetup());
         
         // Visit Classification
-        document.querySelectorAll('.purpose-btn').forEach(btn => {
+        document.querySelectorAll('#classify-modal .purpose-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.selectPurpose(e));
         });
         document.getElementById('add-photo-btn').addEventListener('click', 
