@@ -2,7 +2,7 @@
 // Service Worker - Offline Support
 // ===================================
 
-const CACHE_NAME = 'tour-register-v1.0.0';
+const CACHE_NAME = 'tour-register-v1.1.0';
 const RUNTIME_CACHE = 'tour-register-runtime';
 
 // Files to cache on install

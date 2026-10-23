@@ -234,17 +234,23 @@ class GPSTracker {
     // ===================================
     async onStopDetected(coords) {
         console.log('Stop detected at:', coords);
-        
+
         // Reset stationary timer
         this.stationaryStartTime = null;
-        
+
+        // Check if location is within an exclusion zone
+        if (this.app.isInExclusionZone(coords.lat, coords.lng)) {
+            console.log('Stop is inside an excluded place - skipping visit prompt');
+            return;
+        }
+
         // Calculate visit duration
         const timeIn = Date.now();
         const duration = 10; // Minimum 10 minutes
-        
+
         // Reverse geocode address
         const address = await this.app.reverseGeocode(coords.lat, coords.lng);
-        
+
         // Create pending visit
         this.app.pendingVisit = {
             date: new Date().toISOString().split('T')[0],
@@ -257,7 +263,7 @@ class GPSTracker {
             distance: this.totalDistance,
             classified: false
         };
-        
+
         // Show classification modal
         this.showClassificationNotification(coords, address);
     }

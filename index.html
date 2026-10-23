@@ -131,6 +131,23 @@
                     </div>
                 </div>
                 
+                <div class="setup-card">
+                    <div class="setup-card-header">
+                        <h3>Excluded Places</h3>
+                        <button class="icon-btn" id="add-exclusion-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 5v14m-7-7h14" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="setup-hint">Stops at these places will be ignored automatically (e.g. home, lunch spots).</p>
+                    <div id="exclusion-list" class="exclusion-list">
+                        <div class="empty-state-sm">
+                            <p>No excluded places yet</p>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="btn btn-success btn-large" id="save-setup">
                     Save & Continue
                 </button>
@@ -369,6 +386,60 @@
                 </div>
                 
                 <button class="btn btn-success btn-large" id="save-visit">Save Visit</button>
+            </div>
+        </div>
+
+        <!-- Add Exclusion Zone Modal -->
+        <div id="exclusion-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Excluded Place</h3>
+                    <button class="icon-btn modal-close-btn" id="close-exclusion-modal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="manual-entry-form">
+                    <div class="input-group">
+                        <label>Place Name</label>
+                        <input type="text" id="exclusion-name" class="input-field" placeholder="e.g. My Room, Lunch Spot">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Location</label>
+                        <button class="btn btn-primary btn-large" id="exclusion-use-gps">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 2v4m0 12v4M4 12h4m12 0h4M12 22a10 10 0 100-20 10 10 0 000 20z" stroke-width="2"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            Use Current Location
+                        </button>
+                        <div class="divider">OR</div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Latitude</label>
+                                <input type="number" id="exclusion-lat" class="input-field" step="0.000001" placeholder="23.7957">
+                            </div>
+                            <div class="input-group">
+                                <label>Longitude</label>
+                                <input type="number" id="exclusion-lng" class="input-field" step="0.000001" placeholder="85.5166">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Radius: <span id="exclusion-radius-value">200</span>m</label>
+                        <input type="range" id="exclusion-radius" min="50" max="1000" step="50" value="200" class="radius-slider-sm">
+                    </div>
+
+                    <div id="exclusion-location-preview" class="location-display" style="display: none;">
+                        <p class="location-status" style="color: var(--success); font-weight: 600;"></p>
+                    </div>
+
+                    <button class="btn btn-success btn-large" id="save-exclusion">Save Place</button>
+                </div>
             </div>
         </div>
 
